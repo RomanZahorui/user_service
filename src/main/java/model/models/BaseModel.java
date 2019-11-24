@@ -1,9 +1,9 @@
-package models;
+package model.models;
 
 import java.util.Objects;
 
 /**
- * The class provides initial behavior of the application's models.
+ * The class provides initial behavior of the application's model.models.
  */
 public class BaseModel {
     private int id;

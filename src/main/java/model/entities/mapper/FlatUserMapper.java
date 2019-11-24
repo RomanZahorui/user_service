@@ -1,13 +1,13 @@
-package entities.mapper;
+package model.entities.mapper;
 
-import entities.FlatUser;
-import execptions.BadIdException;
+import model.entities.FlatUser;
+import utils.execptions.BadIdException;
 import java.util.List;
 import java.util.stream.Collectors;
-import models.BaseModel;
-import models.City;
-import models.Country;
-import models.User;
+import model.models.BaseModel;
+import model.models.City;
+import model.models.Country;
+import model.models.User;
 
 /**
  * An implementation of {@link UserDataMapper} interface with {@link FlatUser} type.

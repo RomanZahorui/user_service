@@ -1,8 +1,8 @@
-package entities;
+package model.entities;
 
 import java.time.LocalDate;
 import java.util.Objects;
-import models.BaseModel;
+import model.models.BaseModel;
 
 /**
  * The database entity class. Extends {@link BaseModel}.

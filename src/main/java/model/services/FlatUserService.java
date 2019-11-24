@@ -1,6 +1,6 @@
-package services;
+package model.services;
 
-import entities.FlatUser;
+import model.entities.FlatUser;
 import java.sql.SQLException;
 import java.util.List;
 

@@ -1,10 +1,10 @@
-package entities.mapper;
+package model.entities.mapper;
 
 import java.util.List;
-import models.BaseModel;
-import models.City;
-import models.Country;
-import models.User;
+import model.models.BaseModel;
+import model.models.City;
+import model.models.Country;
+import model.models.User;
 
 /**
  * Provides the interface to map {@link User}, {@link City} and
