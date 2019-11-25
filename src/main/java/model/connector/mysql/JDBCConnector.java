@@ -10,7 +10,7 @@ import java.util.Properties;
  * The class implements {@link ConnectionProvider}
  * {@inheritDoc}
  */
-public class MySqlConnector implements ConnectionProvider {
+public class JDBCConnector implements ConnectionProvider {
 
     /**
      * @param properties an instance of {@link java.util.Properties} with :

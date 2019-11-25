@@ -48,12 +48,22 @@ public class RegistryExecutor implements Executor {
     private List<City> cities;
     private List<User> users;
 
+    /**
+     * Constructor.
+     *
+     * @param provider   an instance of {@link ConnectionProvider}.
+     * @param fileReader an instance of {@link FileReader}.
+     * @param ioHandler  an instance of {@link InOutHandler}.
+     */
     public RegistryExecutor(ConnectionProvider provider, FileReader fileReader, InOutHandler ioHandler) {
         this.provider = provider;
         this.fileReader = fileReader;
         this.ioHandler = ioHandler;
     }
 
+    /**
+     * Performs a sequence of operations to execute the application logic.
+     */
     public void execute() {
         ioHandler.print("Pleas, insert a path for \"Countries.csv\" file : ");
         countriesFileUri = ioHandler.readLine();
@@ -78,7 +88,7 @@ public class RegistryExecutor implements Executor {
         }
 
         ioHandler.println("Establish db connection ...");
-        Connection connection = establishConnection(provider, ioHandler);
+        Connection connection = establishConnection(provider, new PropertyReader(), ioHandler);
         if (connection == null) {
             return;
         }
@@ -106,6 +116,13 @@ public class RegistryExecutor implements Executor {
         }
     }
 
+    /**
+     * Prints an information about loading and delegates the reading operation
+     * to the {@link #loadData(FileReader, String)} method.
+     *
+     * @param reader to read the specified files data.
+     * @return true if the reading operation was successful.
+     */
     private boolean loadAllData(FileReader reader) {
         try {
             ioHandler.println("Read file with countries data...");
@@ -123,10 +140,28 @@ public class RegistryExecutor implements Executor {
         return true;
     }
 
+    /**
+     * Loads data from the specified files into {@code List<Strings>} represented records
+     * for {@link Country},{@link City} and {@link User} objects.
+     *
+     * @param reader  to read the specified file data.
+     * @param fileUri the file's path.
+     * @return a list of strings represented records in the file.
+     * @throws IOException if an error occurred when reading from the file.
+     */
     private List<String> loadData(FileReader reader, String fileUri) throws IOException {
         return reader.read(fileUri);
     }
 
+    /**
+     * Tries to parse data from lists of models records into related
+     * lists of {@link model.models.BaseModel}'s.
+     *
+     * @param separator to split record into string representations of a model parameters.
+     * @param formatter to format strings of the model parameters.
+     * @param ioHandler printing of an error information.
+     * @return true if the parsing process was successful.
+     */
     private boolean parseData(MetaSeparator separator, Formatter formatter, InOutHandler ioHandler) {
         try {
             countries = countryRecords.stream()
@@ -147,16 +182,32 @@ public class RegistryExecutor implements Executor {
         return true;
     }
 
-    private Connection establishConnection(ConnectionProvider provider, InOutHandler ioHandler) {
+
+    /**
+     * Tries to establish a connection to a DB by {@link ConnectionProvider}.
+     *
+     * @param provider  for a DB connection.
+     * @param reader    a property file reader.
+     * @param ioHandler printing of an error information.
+     * @return an established DB connection.
+     */
+    private Connection establishConnection(ConnectionProvider provider, PropertyReader reader, InOutHandler ioHandler) {
         Connection connection = null;
         try {
-            connection = provider.getConnection(new PropertyReader().read("mysql.db.properties"));
+            connection = provider.getConnection(reader.read("mysql.db.properties"));
         } catch (SQLException | IOException e) {
             ioHandler.printErr("Can't establish a connection cause : " + e.getMessage());
         }
         return connection;
     }
 
+    /**
+     * Tries to execute some sql scripts for preparing the DB.
+     *
+     * @param connection {@link Connection} to a database.
+     * @param ioHandler  printing of an error information.
+     * @return true if the initial scripts was executed successful.
+     */
     private boolean executeInitialScripts(Connection connection, InOutHandler ioHandler) {
 
         try (Statement st = connection.createStatement()) {
@@ -179,10 +230,18 @@ public class RegistryExecutor implements Executor {
             ioHandler.printErr("Can't execute sql statement!\n" + e.getMessage());
             return false;
         }
-
         return true;
     }
 
+    /**
+     * Tries to map collected {@code List<User>}, {@code List<City>} and {@code List<Country>} data
+     * into a list of {@link FlatUser} objects and save them by {@link FlatUserService}.
+     *
+     * @param service   for saving the {@link FlatUser} objects into the DB.
+     * @param mapper    maps all collected data into the {@link FlatUser} objects.
+     * @param ioHandler printing of an error information.
+     * @return true if the initial scripts was executed successful.
+     */
     private boolean saveUsers(FlatUserService service, UserDataMapper mapper, InOutHandler ioHandler) {
         try {
             return service.insertAll(mapper.mapToList(users, cities, countries));
@@ -192,6 +251,13 @@ public class RegistryExecutor implements Executor {
         }
     }
 
+    /**
+     * Performs selection of all stored {@link FlatUser} objects in the DB.
+     *
+     * @param service   for retrieving the {@link FlatUser} objects from the DB.
+     * @param ioHandler printing of an error information.
+     * @return list of stored {@link FlatUser}s.
+     */
     private List<FlatUser> selectAllUsers(FlatUserService service, InOutHandler ioHandler) {
         try {
             return service.selectAll();

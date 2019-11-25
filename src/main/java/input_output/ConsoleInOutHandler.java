@@ -4,7 +4,7 @@ package input_output;
  * The class implements {@link InOutHandler}.
  * {@inheritDoc}
  */
-public class ConsoleDataHandler implements InOutHandler {
+public class ConsoleInOutHandler implements InOutHandler {
 
     private DataPrinter printer;
     private DataReader reader;
@@ -15,7 +15,7 @@ public class ConsoleDataHandler implements InOutHandler {
      * @param printer a {@link DataPrinter} implementation.
      * @param reader  a {@link DataReader} implementation.
      */
-    public ConsoleDataHandler(DataPrinter printer, DataReader reader) {
+    public ConsoleInOutHandler(DataPrinter printer, DataReader reader) {
         this.printer = printer;
         this.reader = reader;
     }
