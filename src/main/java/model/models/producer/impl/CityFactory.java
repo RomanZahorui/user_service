@@ -22,6 +22,10 @@ public class CityFactory implements Factory<City> {
      */
     @Override
     public City produce(List<String> modelStringData, Formatter formatter) throws NumberFormatException {
+        if (modelStringData.size() != 3) {
+            throw new NumberFormatException();
+        }
+
         int id = Integer.parseInt(formatter.apply(modelStringData.get(0)));
         String name = formatter.apply(modelStringData.get(1));
         int countryId = Integer.parseInt(formatter.apply(modelStringData.get(2)));

@@ -23,6 +23,10 @@ public class UserFactory implements Factory<User> {
      */
     @Override
     public User produce(List<String> modelStringData, Formatter formatter) throws RuntimeException {
+        if (modelStringData.size() != 4) {
+            throw new NumberFormatException();
+        }
+
         int id = Integer.parseInt(formatter.apply(modelStringData.get(0)));
         String name = formatter.apply(modelStringData.get(1));
         LocalDate date = LocalDate.parse(formatter.apply(modelStringData.get(2)));
