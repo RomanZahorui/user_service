@@ -22,6 +22,10 @@ public class PropertyReader implements BaseReader<Properties, String> {
     public Properties read(String resourceName) throws IOException {
         final Properties properties = new Properties();
         try (InputStream propStream = getClass().getClassLoader().getResourceAsStream(resourceName)) {
+            if (null == propStream) {
+                throw new IOException("Can't read the file : " + resourceName);
+            }
+
             properties.load(propStream);
         } catch (IOException e) {
             throw new IOException("Can't read property file : " + resourceName);

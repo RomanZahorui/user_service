@@ -24,7 +24,7 @@ public interface SystemMsg {
     String STORED_USERS_MSG = "User registry has : ";
 
     String ERROR_FILE_READING = "Can't read files from resources directory!\n";
-    String ERROR_DATA_PARSING = "Can't parse the date!\n";
+    String ERROR_DATA_PARSING = "Can't parse the data!\n";
     String ERROR_WHILE_CONNECTION = "Can't establish a connection!\n";
     String ERROR_EXECUTING_SQL = "Can't execute sql statement!\n";
     String ERROR_WHILE_SAVING = "Can't save the users to the DB!\n";

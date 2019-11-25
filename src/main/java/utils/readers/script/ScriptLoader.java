@@ -19,6 +19,10 @@ public class ScriptLoader implements BaseReader<String, String> {
         final StringBuilder sb = new StringBuilder();
 
         try (InputStream stream = getClass().getClassLoader().getResourceAsStream(scriptName)) {
+            if (null == stream) {
+                throw new IOException("Can't read the file : " + scriptName);
+            }
+
             Reader reader = new InputStreamReader(stream);
             BufferedReader br = new BufferedReader(reader);
             String line = "";

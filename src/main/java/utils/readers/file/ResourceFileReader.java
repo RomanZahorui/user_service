@@ -22,6 +22,10 @@ public class ResourceFileReader implements FileReader {
         final List<String> records = new ArrayList<>();
 
         try (InputStream stream = getClass().getClassLoader().getResourceAsStream(resourceName)) {
+            if (null == stream) {
+                throw new IOException("Can't read the file : " + resourceName);
+            }
+
             Reader reader = new InputStreamReader(stream);
             BufferedReader br = new BufferedReader(reader);
 

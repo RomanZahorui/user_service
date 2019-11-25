@@ -82,7 +82,7 @@ public class RegistryExecutor implements Executor {
 
         ioHandler.println(SystemMsg.MODELS_CREATION);
         boolean isParsed = parseData(s -> Arrays.asList(s.split(",")),
-            s -> s.replaceAll("[^a-zA-Z0-9|-]", ""),
+            s -> s.replaceAll("[^a-zA-Z0-9|(\\s-)]", ""),
             ioHandler);
         if (!isParsed) {
             return;
