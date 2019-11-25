@@ -12,10 +12,10 @@ public interface SystemMsg {
     String SCRIPT_TABLE = "create_table.sql";
     String PROPERTY_FILE = "mysql.db.properties";
 
-    String DATA_LOADING = "Data loading ...";
-    String MODELS_CREATION = "Models creation ...";
-    String ESTABLISH_CONNECTION = "Establish db connection ...";
-    String SCRIPT_EXECUTION = "Create the schema and the table ...";
+    String DATA_LOADING = "Data loading...";
+    String MODELS_CREATION = "Models creation...";
+    String ESTABLISH_CONNECTION = "Establish db connection...";
+    String SCRIPT_EXECUTION = "Create the schema and the table...";
     String DATA_SAVING = "Save the users to the DB...";
     String READ_COUNTRIES_FILE = "Read file with countries data...";
     String READ_CITIES_FILE = "Read file with cities data...";
