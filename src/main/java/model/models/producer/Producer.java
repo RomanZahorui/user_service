@@ -8,10 +8,10 @@ import utils.Formatter;
  * {@link Formatter} interface to format the strings.
  *
  * @param <T> a type of the first argument.
- * @param <U> a type of the second argument.
+ * @param <F> a type of the second argument.
  * @param <R> a return type.
  */
 @FunctionalInterface
-public interface Producer<T, U extends Formatter, R> {
-    R produce(T t, U u);
+public interface Producer<T, F, R> {
+    R produce(T t, F f);
 }

@@ -17,7 +17,7 @@ public class FlatUserMapper implements UserDataMapper<FlatUser> {
     /**
      * {@inheritDoc}
      */
-    @Override
+    @Override //TODO replace lists with Maps to improve Finder algorithm
     public List<FlatUser> mapToList(List<User> users, List<City> cities, List<Country> countries) throws BadIdException {
         return users.parallelStream().map(u -> this.map(u, cities, countries)).collect(Collectors.toList());
     }
@@ -25,7 +25,7 @@ public class FlatUserMapper implements UserDataMapper<FlatUser> {
     /**
      * {@inheritDoc}
      */
-    @Override
+    @Override//TODO replace lists with Maps to improve Finder algorithm
     public FlatUser map(User user, List<City> cities, List<Country> countries) throws BadIdException {
         City city = new Finder<City>().findById(cities, user.getCityId());
         Country country = new Finder<Country>().findById(countries, city.getCountryId());

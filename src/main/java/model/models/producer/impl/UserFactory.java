@@ -43,9 +43,9 @@ public class UserFactory implements Factory<User> {
             int cityId = parser.parseInt(modelStringData.get(3), formatter);
             return new User(id, name, date, cityId);
         } catch (NumberFormatException e) {
-            throw new NotValidDataException("Id value is not valid! " + e.getMessage());
+            throw new NotValidDataException("Id value is not valid!", e);
         } catch (DateTimeParseException e) {
-            throw new NotValidDataException("Day of birth is not valid! " + e.getMessage());
+            throw new NotValidDataException("Day of birth is not valid!", e);
         }
     }
 }

@@ -39,7 +39,7 @@ public class CountryFactory implements Factory<Country> {
             String name = parser.parseStr(modelStringData.get(1), formatter);
             return new Country(id, name);
         } catch (NumberFormatException e) {
-            throw new NotValidDataException("Id value is not valid! " + e.getMessage());
+            throw new NotValidDataException("Id value is not valid! ", e);
         }
     }
 }
