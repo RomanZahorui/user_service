@@ -1,4 +1,4 @@
-package model.models.producer;
+package model.producer;
 
 import utils.Formatter;
 

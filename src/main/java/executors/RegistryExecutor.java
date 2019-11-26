@@ -8,16 +8,17 @@ import java.sql.Statement;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import model.BaseModel;
 import model.connector.ConnectionProvider;
 import model.entities.FlatUser;
 import model.entities.mapper.FlatUserMapper;
 import model.entities.mapper.UserDataMapper;
-import model.models.City;
-import model.models.Country;
-import model.models.User;
-import model.models.producer.impl.CityFactory;
-import model.models.producer.impl.CountryFactory;
-import model.models.producer.impl.UserFactory;
+import model.City;
+import model.Country;
+import model.User;
+import model.producer.impl.CityFactory;
+import model.producer.impl.CountryFactory;
+import model.producer.impl.UserFactory;
 import model.services.FlatUserService;
 import model.services.FlatUserServiceImpl;
 import utils.Formatter;
@@ -30,8 +31,6 @@ import utils.readers.file.RecordsReader;
 import utils.readers.provider.SystemFileReaderProvider;
 import utils.readers.provider.ResourceReaderProvider;
 import utils.readers.provider.BufferedReaderProvider;
-import utils.readers.file.PropertyFileReader;
-import utils.readers.script.ScriptFileReader;
 import utils.readers.script.ScriptReader;
 
 /**
@@ -170,7 +169,7 @@ public class RegistryExecutor implements Executor {
 
     /**
      * Tries to parse data from lists of models records into related
-     * lists of {@link model.models.BaseModel}'s.
+     * lists of {@link BaseModel}'s.
      *
      * @param separator to split record into string representations of a model parameters.
      * @param formatter to format strings of the model parameters.

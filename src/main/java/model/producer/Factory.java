@@ -1,4 +1,4 @@
-package model.models.producer;
+package model.producer;
 
 import java.util.List;
 import utils.Formatter;

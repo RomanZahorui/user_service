@@ -2,7 +2,7 @@ package model.entities;
 
 import java.time.LocalDate;
 import java.util.Objects;
-import model.models.BaseModel;
+import model.BaseModel;
 
 /**
  * The database entity class. Extends {@link BaseModel}.

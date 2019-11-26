@@ -1,10 +1,10 @@
-package model.models.producer.impl;
+package model.producer.impl;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.List;
-import model.models.User;
-import model.models.producer.Factory;
+import model.User;
+import model.producer.Factory;
 import utils.Formatter;
 import utils.execptions.NotValidDataException;
 import utils.parsers.DataParser;

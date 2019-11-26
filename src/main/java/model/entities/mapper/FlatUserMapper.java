@@ -4,10 +4,10 @@ import model.entities.FlatUser;
 import utils.execptions.BadIdException;
 import java.util.List;
 import java.util.stream.Collectors;
-import model.models.BaseModel;
-import model.models.City;
-import model.models.Country;
-import model.models.User;
+import model.BaseModel;
+import model.City;
+import model.Country;
+import model.User;
 
 /**
  * An implementation of {@link UserDataMapper} interface with {@link FlatUser} type.

@@ -2,8 +2,8 @@ package factories;
 
 import java.util.Arrays;
 import java.util.List;
-import model.models.User;
-import model.models.producer.impl.UserFactory;
+import model.User;
+import model.producer.impl.UserFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import utils.execptions.NotValidDataException;
