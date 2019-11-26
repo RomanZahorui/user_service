@@ -45,14 +45,14 @@ public class City extends BaseModel {
             return false;
         }
         City city = (City) o;
-        return super.getId() == city.getId() &&
+        return super.equals(o) &&
             countryId == city.countryId &&
             name.equals(city.name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.getId(), name, countryId);
+        return Objects.hash(super.hashCode(), name, countryId);
     }
 
     @Override
