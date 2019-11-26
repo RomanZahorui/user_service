@@ -23,6 +23,8 @@ import model.services.FlatUserServiceImpl;
 import utils.Formatter;
 import utils.MetaSeparator;
 import utils.SystemMsg;
+import utils.parsers.DataParser;
+import utils.parsers.StringDataParser;
 import utils.readers.file.FileReader;
 import utils.readers.property.PropertyReader;
 import utils.readers.script.ScriptLoader;
@@ -81,7 +83,7 @@ public class RegistryExecutor implements Executor {
         }
 
         ioHandler.println(SystemMsg.MODELS_CREATION);
-        boolean isParsed = parseData(s -> Arrays.asList(s.split(",")),
+        boolean isParsed = parseData(s -> Arrays.asList(s.split(",")), new StringDataParser(),
             s -> s.replaceAll("[^a-zA-Z0-9|(\\s-)]", ""),
             ioHandler);
         if (!isParsed) {
@@ -163,18 +165,19 @@ public class RegistryExecutor implements Executor {
      * @param ioHandler printing of an error information.
      * @return true if the parsing process was successful.
      */
-    private boolean parseData(MetaSeparator separator, Formatter formatter, InOutHandler ioHandler) {
+    private boolean parseData(MetaSeparator separator, DataParser<String> parser,
+                              Formatter formatter, InOutHandler ioHandler) {
         try {
             countries = countryRecords.stream()
-                .map(s -> new CountryFactory().produce(separator.separate(s), formatter))
+                .map(s -> new CountryFactory(parser).produce(separator.separate(s), formatter))
                 .collect(Collectors.toList());
 
             cities = cityRecords.stream()
-                .map(s -> new CityFactory().produce(separator.separate(s), formatter))
+                .map(s -> new CityFactory(parser).produce(separator.separate(s), formatter))
                 .collect(Collectors.toList());
 
             users = userRecords.stream()
-                .map(s -> new UserFactory().produce(separator.separate(s), formatter))
+                .map(s -> new UserFactory(parser).produce(separator.separate(s), formatter))
                 .collect(Collectors.toList());
         } catch (NumberFormatException e) {
             ioHandler.printErr(SystemMsg.ERROR_DATA_PARSING + e.getMessage());

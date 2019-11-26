@@ -4,6 +4,8 @@ import java.util.List;
 import model.models.City;
 import model.models.producer.Factory;
 import utils.Formatter;
+import utils.execptions.NotValidDataException;
+import utils.parsers.DataParser;
 
 /**
  * The class implements {@link Factory} interface. Produces an instance of the {@link City} base on data contained in
@@ -11,6 +13,11 @@ import utils.Formatter;
  */
 public class CityFactory implements Factory<City> {
 
+    private final DataParser<String> parser;
+
+    public CityFactory(DataParser<String> parser) {
+        this.parser = parser;
+    }
     /**
      * Parses the list of string into related values.
      *
@@ -21,14 +28,18 @@ public class CityFactory implements Factory<City> {
      *                               parsable integer.
      */
     @Override
-    public City produce(List<String> modelStringData, Formatter formatter) throws NumberFormatException {
-        if (modelStringData.size() != 3) {
-            throw new NumberFormatException();
+    public City produce(List<String> modelStringData, Formatter formatter) throws NotValidDataException {
+        if (modelStringData.size() != 3 || modelStringData.contains(null)) {
+            throw new NotValidDataException("Input data is not valid! " + modelStringData);
         }
 
-        int id = Integer.parseInt(formatter.apply(modelStringData.get(0)));
-        String name = formatter.apply(modelStringData.get(1));
-        int countryId = Integer.parseInt(formatter.apply(modelStringData.get(2)));
-        return new City(id, name, countryId);
+        try {
+            int id = parser.parseInt(modelStringData.get(0), formatter);
+            String name = parser.parseStr(modelStringData.get(1), formatter);
+            int countryId = parser.parseInt(modelStringData.get(2), formatter);
+            return new City(id, name, countryId);
+        } catch (NumberFormatException e) {
+            throw new NotValidDataException("Id value is not valid! " + e.getMessage());
+        }
     }
 }
