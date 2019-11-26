@@ -4,17 +4,20 @@ import java.io.IOException;
 import java.util.Properties;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import utils.readers.property.PropertyReader;
+import utils.readers.provider.ResourceReaderProvider;
+import utils.readers.provider.BufferedReaderProvider;
+import utils.readers.file.PropertyFileReader;
 
-public class PropertyReaderTest {
-    private final PropertyReader reader = new PropertyReader();
+public class PropertyFileReaderTest {
+    private final PropertyFileReader reader = new PropertyFileReader();
+    private final BufferedReaderProvider readerProvider = new ResourceReaderProvider();
 
     @Test
     public void readTest() {
         String testPath = "test.properties";
         String testLine = "test.jdbc.driver";
         try {
-            Properties result = reader.read(testPath);
+            Properties result = reader.read(readerProvider, testPath);
             Assertions.assertEquals("com.mysql.jdbc.Driver", result.getProperty(testLine));
         } catch (IOException e) {
             e.printStackTrace();
@@ -26,7 +29,7 @@ public class PropertyReaderTest {
         String testPath = "test.properties23";
         String testLine = "Can't read property file : test.properties23";
         try {
-            Properties result = reader.read(testPath);
+            Properties result = reader.read(readerProvider, testPath);
         } catch (IOException e) {
             Assertions.assertEquals(testLine, e.getMessage());
         }

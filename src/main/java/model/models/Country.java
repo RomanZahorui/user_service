@@ -34,13 +34,13 @@ public class Country extends BaseModel {
             return false;
         }
         Country country = (Country) o;
-        return super.getId() == country.getId() &&
+        return super.equals(o) &&
             name.equals(country.name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.getId(), name);
+        return Objects.hash(super.hashCode(), name);
     }
 
     @Override

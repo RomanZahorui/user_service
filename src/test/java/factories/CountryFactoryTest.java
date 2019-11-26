@@ -43,6 +43,7 @@ public class CountryFactoryTest {
 
         try {
             Country test = factory.produce(testData, s -> s.replaceAll("[^a-zA-Z0-9|(\\s-)]", ""));
+            Assertions.fail("Expected NotValidEx");
         } catch (NotValidDataException e) {
             System.out.println(e.getMessage());
             Assertions.assertEquals(exceptionMsg, e.getMessage());

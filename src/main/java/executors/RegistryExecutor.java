@@ -25,9 +25,14 @@ import utils.MetaSeparator;
 import utils.SystemMsg;
 import utils.parsers.DataParser;
 import utils.parsers.StringDataParser;
-import utils.readers.file.FileReader;
-import utils.readers.property.PropertyReader;
-import utils.readers.script.ScriptLoader;
+import utils.readers.file.PropertyReader;
+import utils.readers.file.RecordsReader;
+import utils.readers.provider.SystemFileReaderProvider;
+import utils.readers.provider.ResourceReaderProvider;
+import utils.readers.provider.BufferedReaderProvider;
+import utils.readers.file.PropertyFileReader;
+import utils.readers.script.ScriptFileReader;
+import utils.readers.script.ScriptReader;
 
 /**
  * The class implement {@link Executor} interface.
@@ -37,7 +42,9 @@ public class RegistryExecutor implements Executor {
 
     private ConnectionProvider provider;
     private InOutHandler ioHandler;
-    private FileReader fileReader;
+    private RecordsReader fileReader;
+    private PropertyReader propertyReader;
+    private ScriptReader scriptReader;
 
     private String countriesFileUri;
     private String citiesFileUri;
@@ -54,13 +61,19 @@ public class RegistryExecutor implements Executor {
     /**
      * Constructor.
      *
-     * @param provider   an instance of {@link ConnectionProvider}.
-     * @param fileReader an instance of {@link FileReader}.
-     * @param ioHandler  an instance of {@link InOutHandler}.
+     * @param provider   provides a DB connection.
+     * @param recordsReader for a CSV file reading.
+     * @param ioHandler  for app input and output process.
      */
-    public RegistryExecutor(ConnectionProvider provider, FileReader fileReader, InOutHandler ioHandler) {
+    public RegistryExecutor(ConnectionProvider provider,
+                            RecordsReader recordsReader,
+                            PropertyReader propertyReader,
+                            ScriptReader scriptReader,
+                            InOutHandler ioHandler) {
         this.provider = provider;
-        this.fileReader = fileReader;
+        this.fileReader = recordsReader;
+        this.propertyReader = propertyReader;
+        this.scriptReader = scriptReader;
         this.ioHandler = ioHandler;
     }
 
@@ -91,13 +104,13 @@ public class RegistryExecutor implements Executor {
         }
 
         ioHandler.println(SystemMsg.ESTABLISH_CONNECTION);
-        Connection connection = establishConnection(provider, new PropertyReader(), ioHandler);
+        Connection connection = establishConnection(provider, propertyReader, ioHandler);
         if (connection == null) {
             return;
         }
 
         ioHandler.println(SystemMsg.SCRIPT_EXECUTION);
-        boolean isExecuted = executeInitialScripts(connection, ioHandler);
+        boolean isExecuted = executeInitialScripts(connection, scriptReader, ioHandler);
         if (!isExecuted) {
             return;
         }
@@ -106,11 +119,10 @@ public class RegistryExecutor implements Executor {
         FlatUserService service = new FlatUserServiceImpl(connection);
         UserDataMapper mapper = new FlatUserMapper();
         boolean isSaved = saveUsers(service, mapper, ioHandler);
-        if (isSaved) {
-            ioHandler.println(SystemMsg.SAVED_USER_MSG);
-        } else {
+        if (!isSaved) {
             return;
         }
+        ioHandler.println(SystemMsg.SAVED_USER_MSG);
 
         List<FlatUser> savedUsers = selectAllUsers(service, ioHandler);
         if (null != savedUsers && !savedUsers.isEmpty()) {
@@ -121,12 +133,12 @@ public class RegistryExecutor implements Executor {
 
     /**
      * Prints an information about loading and delegates the reading operation
-     * to the {@link #loadData(FileReader, String)} method.
+     * to the {@link #loadData(RecordsReader, String)} method.
      *
      * @param reader to read the specified files data.
      * @return true if the reading operation was successful.
      */
-    private boolean loadAllData(FileReader reader) {
+    private boolean loadAllData(RecordsReader reader) {
         try {
             ioHandler.println(SystemMsg.READ_COUNTRIES_FILE);
             countryRecords = loadData(reader, countriesFileUri);
@@ -152,8 +164,8 @@ public class RegistryExecutor implements Executor {
      * @return a list of strings represented records in the file.
      * @throws IOException if an error occurred when reading from the file.
      */
-    private List<String> loadData(FileReader reader, String fileUri) throws IOException {
-        return reader.read(fileUri);
+    private List<String> loadData(RecordsReader reader, String fileUri) throws IOException {
+        return reader.read(new SystemFileReaderProvider(), fileUri);
     }
 
     /**
@@ -197,8 +209,9 @@ public class RegistryExecutor implements Executor {
      */
     private Connection establishConnection(ConnectionProvider provider, PropertyReader reader, InOutHandler ioHandler) {
         Connection connection = null;
+        BufferedReaderProvider readerProvider = new ResourceReaderProvider();
         try {
-            connection = provider.getConnection(reader.read(SystemMsg.PROPERTY_FILE));
+            connection = provider.getConnection(reader.read(readerProvider, SystemMsg.PROPERTY_FILE));
         } catch (SQLException | IOException e) {
             ioHandler.printErr(SystemMsg.ERROR_WHILE_CONNECTION + e.getMessage());
         }
@@ -212,20 +225,20 @@ public class RegistryExecutor implements Executor {
      * @param ioHandler  printing of an error information.
      * @return true if the initial scripts was executed successful.
      */
-    private boolean executeInitialScripts(Connection connection, InOutHandler ioHandler) {
+    private boolean executeInitialScripts(Connection connection, ScriptReader scriptReader, InOutHandler ioHandler) {
 
         try (Statement st = connection.createStatement()) {
-            ScriptLoader loader = new ScriptLoader();
+            BufferedReaderProvider readerProvider = new ResourceReaderProvider();
 
             try {
-                String schema = loader.read(SystemMsg.SCRIPT_SCHEMA);
+                String schema = scriptReader.read(readerProvider, SystemMsg.SCRIPT_SCHEMA);
                 st.executeUpdate(schema);
             } catch (SQLException | IOException e) {
                 ioHandler.printErr(SystemMsg.ERROR_EXECUTING_SQL + e.getMessage());
             }
 
             try {
-                String table = loader.read(SystemMsg.SCRIPT_TABLE);
+                String table = scriptReader.read(readerProvider, SystemMsg.SCRIPT_TABLE);
                 st.executeUpdate(table);
             } catch (SQLException | IOException e) {
                 ioHandler.printErr(SystemMsg.ERROR_EXECUTING_SQL + e.getMessage());
