@@ -1,6 +1,7 @@
 package model.entities.mapper;
 
 import java.util.List;
+import java.util.Map;
 import model.BaseModel;
 import model.City;
 import model.Country;
@@ -15,18 +16,19 @@ import model.User;
 public interface UserDataMapper<T extends BaseModel> {
 
     /**
-     * @param users     a list of the incoming users data.
-     * @param cities    a list of the incoming cities data.
-     * @param countries a list of the incoming countries data.
+     * @param users     a map of id's and related users.
+     * @param cities    a map of id's and related cities data.
+     * @param countries a map of id's and related countries data.
      * @return a list of result instances.
      */
-    List<T> mapToList(List<User> users, List<City> cities, List<Country> countries);
+    List<T> mapToList(Map<Integer, User> users, Map<Integer, City> cities,
+                      Map<Integer, Country> countries);
 
     /**
-     * @param user      the incoming user's data.
-     * @param cities    the incoming city's data.
-     * @param countries the incoming country's data.
+     * @param user      a single user.
+     * @param cities    a map of id's and related cities data.
+     * @param countries a map of id's and related countries data.
      * @return
      */
-    T map(User user, List<City> cities, List<Country> countries);
+    T map(User user, Map<Integer, City> cities, Map<Integer, Country> countries);
 }

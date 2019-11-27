@@ -25,12 +25,12 @@ public interface FlatUserService {
      * @throws SQLException if a database access error occurs
      *                      or this method is called on a closed connection.
      */
-    boolean insertAll(List<FlatUser> users) throws SQLException;
+    void insertAll(List<FlatUser> users) throws SQLException;
 
     /**
      * Retrieves and returns all database {@link FlatUser} rows.
      *
-     * @return
+     * @return a list of {@link FlatUser} stored in the database.
      * @throws SQLException if a database access error occurs
      *                      or this method is called on a closed connection.
      */

@@ -1,34 +1,49 @@
 package model.entities.mapper;
 
-import model.entities.FlatUser;
-import utils.execptions.BadIdException;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import model.BaseModel;
 import model.City;
 import model.Country;
 import model.User;
+import model.entities.FlatUser;
+import utils.execptions.BadIdException;
 
 /**
  * An implementation of {@link UserDataMapper} interface with {@link FlatUser} type.
  */
 public class FlatUserMapper implements UserDataMapper<FlatUser> {
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override //TODO replace lists with Maps to improve Finder algorithm
-    public List<FlatUser> mapToList(List<User> users, List<City> cities, List<Country> countries) throws BadIdException {
-        return users.parallelStream().map(u -> this.map(u, cities, countries)).collect(Collectors.toList());
+    private final Finder<City> cityFinder;
+    private final Finder<Country> countryFinder;
+
+    public FlatUserMapper() {
+        this.cityFinder = new Finder<>();
+        this.countryFinder = new Finder<>();
     }
 
     /**
      * {@inheritDoc}
      */
-    @Override//TODO replace lists with Maps to improve Finder algorithm
-    public FlatUser map(User user, List<City> cities, List<Country> countries) throws BadIdException {
-        City city = new Finder<City>().findById(cities, user.getCityId());
-        Country country = new Finder<Country>().findById(countries, city.getCountryId());
+    @Override
+    public List<FlatUser> mapToList(Map<Integer, User> users,
+                                    Map<Integer, City> cities,
+                                    Map<Integer, Country> countries) throws BadIdException {
+        return users.values().stream()
+            .map(u -> this.map(u, cities, countries))
+            .collect(Collectors.toList());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public FlatUser map(User user,
+                        Map<Integer, City> cities,
+                        Map<Integer, Country> countries) throws BadIdException {
+        City city = cityFinder.findById(cities, user.getCityId());
+        Country country = countryFinder.findById(countries, city.getCountryId());
         return new FlatUser(user.getId(), user.getName(), user.getBirthday(), city.getName(), country.getName());
     }
 
@@ -47,11 +62,8 @@ public class FlatUserMapper implements UserDataMapper<FlatUser> {
          * @return the single object whit a specified id.
          * @throws BadIdException if the list is not contain the id.
          */
-        private F findById(List<F> data, int id) throws BadIdException {
-            return data.stream()
-                .filter(c -> c.getId() == id)
-                .findFirst()
-                .orElseThrow(BadIdException::new);
+        private F findById(Map<Integer, F> data, int id) throws BadIdException {
+            return data.get(id);
         }
     }
 

@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import model.BaseModel;
@@ -55,9 +56,9 @@ public class ApplicationExecutor implements Executor {
     private List<String> cityRecords;
     private List<String> userRecords;
 
-    private List<Country> countries;
-    private List<City> cities;
-    private List<User> users;
+    private Map<Integer, Country> countries;
+    private Map<Integer, City> cities;
+    private Map<Integer, User> users;
 
     /**
      * Constructor.
@@ -191,15 +192,15 @@ public class ApplicationExecutor implements Executor {
                            Formatter formatter) throws NotValidDataException {
         countries = countryRecords.stream()
             .map(s -> new CountryFactory(parser).produce(separator.separate(s), formatter))
-            .collect(Collectors.toList());
+            .collect(Collectors.toMap(BaseModel::getId, country -> country));
 
         cities = cityRecords.stream()
             .map(s -> new CityFactory(parser).produce(separator.separate(s), formatter))
-            .collect(Collectors.toList());
+            .collect(Collectors.toMap(BaseModel::getId, city -> city));
 
         users = userRecords.stream()
             .map(s -> new UserFactory(parser).produce(separator.separate(s), formatter))
-            .collect(Collectors.toList());
+            .collect(Collectors.toMap(BaseModel::getId, user -> user));
     }
 
     /**
