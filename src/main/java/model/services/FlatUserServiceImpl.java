@@ -1,10 +1,10 @@
 package model.services;
 
-import model.entities.FlatUser;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import model.entities.FlatUser;
 
 /**
  * An implementation of {@link FlatUserService} interface.
@@ -48,11 +48,10 @@ public class FlatUserServiceImpl implements FlatUserService {
      * {@inheritDoc}
      */
     @Override
-    public boolean insertAll(List<FlatUser> users) throws SQLException {
+    public void insertAll(List<FlatUser> users) throws SQLException {
         for (FlatUser u : users) {
             save(u);
         }
-        return true;
     }
 
     /**
