@@ -4,13 +4,13 @@ import java.io.IOException;
 import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import utils.readers.provider.ResourceReaderProvider;
+import utils.readers.provider.ResourceFileReaderProvider;
 import utils.readers.provider.BufferedReaderProvider;
 import utils.readers.file.CSVFileReader;
 
 public class ResourceFileReaderTest {
     private final CSVFileReader reader = new CSVFileReader();
-    private final BufferedReaderProvider readerProvider = new ResourceReaderProvider();
+    private final BufferedReaderProvider readerProvider = new ResourceFileReaderProvider();
 
     @Test
     public void readTest() {

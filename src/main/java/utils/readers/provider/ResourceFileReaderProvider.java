@@ -9,7 +9,7 @@ import utils.execptions.ReadFileException;
  * The class provides opening of a {@link BufferedReader} for a resource file by
  * using of the {@code getClass().getClassLoader().getResourceAsStream(path)} structure.
  */
-public class ResourceReaderProvider implements BufferedReaderProvider {
+public class ResourceFileReaderProvider implements BufferedReaderProvider {
 
     /**
      * Returns a buffered reader for reading the specified file's path.

@@ -31,8 +31,6 @@ import utils.parsers.StringDataParser;
 import utils.readers.file.PropertyReader;
 import utils.readers.file.RecordsReader;
 import utils.readers.provider.BufferedReaderProvider;
-import utils.readers.provider.ResourceReaderProvider;
-import utils.readers.provider.SystemFileReaderProvider;
 import utils.readers.script.ScriptReader;
 
 /**
@@ -46,6 +44,8 @@ public class ApplicationExecutor implements Executor {
     private RecordsReader fileReader;
     private PropertyReader propertyReader;
     private ScriptReader scriptReader;
+    private BufferedReaderProvider resourceProvider;
+    private BufferedReaderProvider systemProvider;
 
     private String countriesFileUri;
     private String citiesFileUri;
@@ -70,11 +70,15 @@ public class ApplicationExecutor implements Executor {
                                RecordsReader recordsReader,
                                PropertyReader propertyReader,
                                ScriptReader scriptReader,
+                               BufferedReaderProvider resourceProvider,
+                               BufferedReaderProvider systemProvider,
                                InOutHandler ioHandler) {
         this.provider = provider;
         this.fileReader = recordsReader;
         this.propertyReader = propertyReader;
         this.scriptReader = scriptReader;
+        this.resourceProvider = resourceProvider;
+        this.systemProvider = systemProvider;
         this.ioHandler = ioHandler;
     }
 
@@ -111,22 +115,20 @@ public class ApplicationExecutor implements Executor {
         ioHandler.println(SystemMsg.ESTABLISH_CONNECTION);
         Connection connection;
         try {
-            connection = establishConnection(provider, propertyReader);
+            connection = establishConnection(provider, resourceProvider, propertyReader);
         } catch (SQLException | IOException e) {
             ioHandler.printErr(SystemMsg.ERROR_WHILE_CONNECTION + e.getMessage());
             return;
         }
 
         ioHandler.println(SystemMsg.SCRIPT_EXECUTION);
-        final BufferedReaderProvider readerProvider = new ResourceReaderProvider();
         try {
             executeSqlScript(connection,
-                retrieveScript(readerProvider, scriptReader, SystemMsg.SCRIPT_SCHEMA));
+                retrieveScript(resourceProvider, scriptReader, SystemMsg.SCRIPT_SCHEMA));
             executeSqlScript(connection,
-                retrieveScript(readerProvider, scriptReader, SystemMsg.SCRIPT_TABLE));
+                retrieveScript(resourceProvider, scriptReader, SystemMsg.SCRIPT_TABLE));
         } catch (SQLException | IOException e) {
             ioHandler.printErr(SystemMsg.ERROR_EXECUTING_SQL + e.getMessage());
-            return;
         }
 
         ioHandler.println(SystemMsg.DATA_SAVING);
@@ -134,12 +136,11 @@ public class ApplicationExecutor implements Executor {
         UserDataMapper mapper = new FlatUserMapper();
         try {
             saveUsers(service, mapper);
+            ioHandler.println(SystemMsg.SAVED_USER_MSG);
         } catch (SQLException e) {
             ioHandler.printErr(SystemMsg.ERROR_WHILE_SAVING + e.getMessage());
-            return;
         }
 
-        ioHandler.println(SystemMsg.SAVED_USER_MSG);
         try {
             Optional<List<FlatUser>> savedUsers = Optional.ofNullable(selectAllUsers(service));
             ioHandler.println(SystemMsg.STORED_USERS_MSG);
@@ -176,7 +177,7 @@ public class ApplicationExecutor implements Executor {
      * @throws IOException if an error occurred when reading from the file.
      */
     private List<String> loadData(RecordsReader reader, String fileUri) throws IOException {
-        return reader.read(new SystemFileReaderProvider(), fileUri);
+        return reader.read(systemProvider, fileUri);
     }
 
     /**
@@ -208,9 +209,8 @@ public class ApplicationExecutor implements Executor {
      * @param reader   a property file reader.
      * @return an established DB connection.
      */
-    private Connection establishConnection(ConnectionProvider provider,
+    private Connection establishConnection(ConnectionProvider provider, BufferedReaderProvider readerProvider,
                                            PropertyReader reader) throws SQLException, IOException {
-        BufferedReaderProvider readerProvider = new ResourceReaderProvider();
         return provider.getConnection(reader.read(readerProvider, SystemMsg.PROPERTY_FILE));
     }
 
@@ -255,7 +255,7 @@ public class ApplicationExecutor implements Executor {
     /**
      * Performs selection of all stored {@link FlatUser} objects in the DB.
      *
-     * @param service   for retrieving the {@link FlatUser} objects from the DB.
+     * @param service for retrieving the {@link FlatUser} objects from the DB.
      * @return list of stored {@link FlatUser}s.
      */
     private List<FlatUser> selectAllUsers(FlatUserService service) throws SQLException {
