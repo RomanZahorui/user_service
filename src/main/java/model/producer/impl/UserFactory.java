@@ -37,10 +37,10 @@ public class UserFactory implements Factory<User> {
         }
 
         try {
-            int id = parser.parseInt(modelStringData.get(0), formatter);
-            String name = parser.parseStr(modelStringData.get(1), formatter);
-            LocalDate date = parser.parseLocalDate(modelStringData.get(2), formatter);
-            int cityId = parser.parseInt(modelStringData.get(3), formatter);
+            int id = parser.convertToInt(modelStringData.get(0), formatter);
+            String name = parser.convertToString(modelStringData.get(1), formatter);
+            LocalDate date = parser.convertTOLocalDate(modelStringData.get(2), formatter);
+            int cityId = parser.convertToInt(modelStringData.get(3), formatter);
             return new User(id, name, date, cityId);
         } catch (NumberFormatException e) {
             throw new NotValidDataException("Id value is not valid!", e);

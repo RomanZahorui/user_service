@@ -35,8 +35,8 @@ public class CountryFactory implements Factory<Country> {
         }
 
         try {
-            int id = parser.parseInt(modelStringData.get(0), formatter);
-            String name = parser.parseStr(modelStringData.get(1), formatter);
+            int id = parser.convertToInt(modelStringData.get(0), formatter);
+            String name = parser.convertToString(modelStringData.get(1), formatter);
             return new Country(id, name);
         } catch (NumberFormatException e) {
             throw new NotValidDataException("Id value is not valid! ", e);

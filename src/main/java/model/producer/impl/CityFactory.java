@@ -34,9 +34,9 @@ public class CityFactory implements Factory<City> {
         }
 
         try {
-            int id = parser.parseInt(modelStringData.get(0), formatter);
-            String name = parser.parseStr(modelStringData.get(1), formatter);
-            int countryId = parser.parseInt(modelStringData.get(2), formatter);
+            int id = parser.convertToInt(modelStringData.get(0), formatter);
+            String name = parser.convertToString(modelStringData.get(1), formatter);
+            int countryId = parser.convertToInt(modelStringData.get(2), formatter);
             return new City(id, name, countryId);
         } catch (NumberFormatException e) {
             throw new NotValidDataException("Id value is not valid!", e);
