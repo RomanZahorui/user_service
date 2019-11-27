@@ -1,9 +1,12 @@
 package input_output;
 
+import org.apache.log4j.Logger;
+
 /**
  * The class implements {@link DataPrinter} interface.
  */
 public class ConsolePrinter implements DataPrinter {
+    private final Logger logger = Logger.getLogger(ConsolePrinter.class.getSimpleName());
 
     /**
      * Prints a message and then terminate the line.
@@ -12,7 +15,7 @@ public class ConsolePrinter implements DataPrinter {
      */
     @Override
     public void print(String msg) {
-        System.out.println(msg);
+        logger.trace(msg);
     }
 
     /**
@@ -34,13 +37,13 @@ public class ConsolePrinter implements DataPrinter {
     @Override
     public void printErr(String errorMsg) {
         printNewLine();
-        print("Error : " + errorMsg);
+        logger.error(errorMsg);
     }
 
     /**
      * Prints a new line.
      */
     private void printNewLine() {
-        System.out.println();
+        logger.trace("\n");
     }
 }

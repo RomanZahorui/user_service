@@ -24,6 +24,7 @@ import model.services.FlatUserServiceImpl;
 import utils.Formatter;
 import utils.MetaSeparator;
 import utils.SystemMsg;
+import utils.execptions.NotValidDataException;
 import utils.parsers.DataParser;
 import utils.parsers.StringDataParser;
 import utils.readers.file.PropertyReader;
@@ -37,7 +38,7 @@ import utils.readers.script.ScriptReader;
  * The class implement {@link Executor} interface.
  * Initiates a sequence of actions representing the application logic.
  */
-public class RegistryExecutor implements Executor {
+public class ApplicationExecutor implements Executor {
 
     private ConnectionProvider provider;
     private InOutHandler ioHandler;
@@ -64,11 +65,11 @@ public class RegistryExecutor implements Executor {
      * @param recordsReader for a CSV file reading.
      * @param ioHandler  for app input and output process.
      */
-    public RegistryExecutor(ConnectionProvider provider,
-                            RecordsReader recordsReader,
-                            PropertyReader propertyReader,
-                            ScriptReader scriptReader,
-                            InOutHandler ioHandler) {
+    public ApplicationExecutor(ConnectionProvider provider,
+                               RecordsReader recordsReader,
+                               PropertyReader propertyReader,
+                               ScriptReader scriptReader,
+                               InOutHandler ioHandler) {
         this.provider = provider;
         this.fileReader = recordsReader;
         this.propertyReader = propertyReader;
@@ -190,7 +191,7 @@ public class RegistryExecutor implements Executor {
             users = userRecords.stream()
                 .map(s -> new UserFactory(parser).produce(separator.separate(s), formatter))
                 .collect(Collectors.toList());
-        } catch (NumberFormatException e) {
+        } catch (NotValidDataException e) {
             ioHandler.printErr(SystemMsg.ERROR_DATA_PARSING + e.getMessage());
             return false;
         }

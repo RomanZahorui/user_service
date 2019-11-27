@@ -14,6 +14,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <mysql.version>8.0.16</mysql.version>
         <junint.jupiter.version>5.5.2</junint.jupiter.version>
+        <logger.version>1.2.17</logger.version>
     </properties>
 
     <dependencies>
@@ -22,12 +23,16 @@
             <artifactId>mysql-connector-java</artifactId>
             <version>${mysql.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
             <version>${junint.jupiter.version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>${logger.version}</version>
         </dependency>
     </dependencies>
 

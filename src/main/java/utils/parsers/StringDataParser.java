@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import utils.Formatter;
 
+//TODO javaDocs and tests
 public class StringDataParser implements DataParser<String> {
 
     @Override

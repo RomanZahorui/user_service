@@ -1,4 +1,4 @@
-import executors.RegistryExecutor;
+import executors.ApplicationExecutor;
 import input_output.*;
 import java.util.Scanner;
 import model.connector.ConnectionProvider;
@@ -32,7 +32,7 @@ public class Application {
         InOutHandler ioHandler = new ConsoleInOutHandler(dataPrinter, dataReader);
 
         // Initialization and start of the program logic executor.
-        RegistryExecutor executor = new RegistryExecutor(
+        ApplicationExecutor executor = new ApplicationExecutor(
             provider, fileReader, propertyReader, scriptReader, ioHandler);
         executor.execute();
     }

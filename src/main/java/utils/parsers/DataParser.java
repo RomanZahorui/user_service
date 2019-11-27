@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import utils.Formatter;
 
+//TODO javaDocs
 public interface DataParser<T> {
     int parseInt(T data, Formatter formatter) throws NumberFormatException;
 
