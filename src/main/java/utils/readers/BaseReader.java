@@ -1,14 +1,23 @@
 package utils.readers;
 
 import java.io.IOException;
+import utils.readers.provider.BufferedReaderProvider;
 
 /**
- * An interface to "read" data from the type to the another one.
+ * The interface is designed for any text file reading operation.
+ * Requires an implementation of  {@link BufferedReaderProvider}.
  *
  * @param <O> output type.
- * @param <I> input type.
+ * @see BufferedReaderProvider
  */
 @FunctionalInterface
-public interface BaseReader<O, I> {
-    O read(I input) throws IOException;
+public interface BaseReader<O> {
+    /**
+     * @param readerProvider provides an open {@link java.io.BufferedReader}
+     *                       that should be closed after usage.
+     * @param path           of the file.
+     * @return result of the reading.
+     * @throws IOException if an I/O exception has occurred.
+     */
+    O read(BufferedReaderProvider readerProvider, String path) throws IOException;
 }

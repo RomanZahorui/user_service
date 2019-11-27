@@ -1,4 +1,4 @@
-package model.models;
+package model;
 
 import java.time.LocalDate;
 import java.util.Objects;
@@ -13,10 +13,11 @@ public class User extends BaseModel {
 
     /**
      * Constructor.
-     * @param id of the user ({@link BaseModel}).
-     * @param name of the user.
+     *
+     * @param id       of the user ({@link BaseModel}).
+     * @param name     of the user.
      * @param birthday the date of user's birth.
-     * @param cityId the id the related city.
+     * @param cityId   the id the related city.
      */
     public User(int id, String name, LocalDate birthday, int cityId) {
         super(id);
@@ -49,7 +50,6 @@ public class User extends BaseModel {
         this.cityId = cityId;
     }
 
-
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -58,12 +58,11 @@ public class User extends BaseModel {
         if (!(o instanceof User)) {
             return false;
         }
-        if (!super.equals(o)) {
-            return false;
-        }
         User user = (User) o;
-        return Objects.equals(name, user.name) &&
-            Objects.equals(birthday, user.birthday);
+        return super.equals(o) &&
+            cityId == user.cityId &&
+            name.equals(user.name) &&
+            birthday.equals(user.birthday);
     }
 
     @Override

@@ -1,16 +1,16 @@
 package raders;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Properties;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import utils.execptions.NotValidDataException;
 import utils.readers.provider.ResourceFileReaderProvider;
 import utils.readers.provider.BufferedReaderProvider;
-import utils.readers.file.CSVFileReader;
+import utils.readers.file.PropertyFileReader;
 
-public class ResourceFileReaderTest {
-    private final CSVFileReader reader = new CSVFileReader();
+public class PropertyFileReaderTest {
+    private final PropertyFileReader reader = new PropertyFileReader();
     private final BufferedReaderProvider readerProvider = new ResourceFileReaderProvider();
 
     @Test
@@ -22,14 +22,16 @@ public class ResourceFileReaderTest {
     @Test
     public void readTest() throws IOException {
         String testPath = "test.properties";
-        String testLine = "# MySQL DB properties";
-        List<String> result = reader.read(readerProvider, testPath);
-        Assertions.assertEquals(testLine, result.get(0));
+        String testLine = "test.jdbc.driver";
+        Properties result = reader.read(readerProvider, testPath);
+        Assertions.assertEquals("com.mysql.jdbc.Driver", result.getProperty(testLine));
     }
 
     @Test
     public void readTestIOException() {
         String testPath = "test.properties23";
-        Assertions.assertThrows(IOException.class, () -> reader.read(readerProvider, testPath));
+        Assertions.assertThrows(IOException.class, () -> {
+            reader.read(readerProvider, testPath);
+        });
     }
 }

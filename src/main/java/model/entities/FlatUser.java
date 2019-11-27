@@ -2,7 +2,7 @@ package model.entities;
 
 import java.time.LocalDate;
 import java.util.Objects;
-import model.models.BaseModel;
+import model.BaseModel;
 
 /**
  * The database entity class. Extends {@link BaseModel}.
@@ -69,14 +69,14 @@ public class FlatUser extends BaseModel {
             return false;
         }
         FlatUser flatUser = (FlatUser) o;
-        return super.getId() == flatUser.getId() &&
+        return super.equals(o) &&
             name.equals(flatUser.name) &&
             birthday.equals(flatUser.birthday);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.getId(), name, birthday);
+        return Objects.hash(super.hashCode(), name, birthday);
     }
 
     @Override

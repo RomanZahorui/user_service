@@ -1,23 +1,20 @@
-package model.models;
+package model;
 
 import java.util.Objects;
 
 /**
  * The class extends {@link BaseModel}
  */
-public class City extends BaseModel {
+public class Country extends BaseModel {
     private String name;
-    private int countryId;
 
     /**
      * @param id of the {@link BaseModel}.
-     * @param name of the city.
-     * @param countryId an id of the related country.
+     * @param name of the country.
      */
-    public City(int id, String name, int countryId) {
+    public Country(int id, String name) {
         super(id);
         this.name = name;
-        this.countryId = countryId;
     }
 
     public String getName() {
@@ -28,14 +25,6 @@ public class City extends BaseModel {
         this.name = name;
     }
 
-    public int getCountryId() {
-        return countryId;
-    }
-
-    public void setCountryId(int countryId) {
-        this.countryId = countryId;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -44,23 +33,21 @@ public class City extends BaseModel {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        City city = (City) o;
-        return super.getId() == city.getId() &&
-            countryId == city.countryId &&
-            name.equals(city.name);
+        Country country = (Country) o;
+        return super.equals(o) &&
+            name.equals(country.name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.getId(), name, countryId);
+        return Objects.hash(super.hashCode(), name);
     }
 
     @Override
     public String toString() {
-        return "City{" +
+        return "Country{" +
             "id=" + super.getId() +
             ", name='" + name + '\'' +
-            ", countryId=" + countryId +
             '}';
     }
 }
