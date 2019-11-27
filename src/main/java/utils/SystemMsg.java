@@ -12,6 +12,8 @@ public interface SystemMsg {
     String SCRIPT_TABLE = "create_table.sql";
     String PROPERTY_FILE = "mysql.db.properties";
 
+    String FORMAT_REGEX = "[^a-zA-Z0-9|(\\s-)]";
+
     String DATA_LOADING = "Data loading...";
     String MODELS_CREATION = "Models creation...";
     String ESTABLISH_CONNECTION = "Establish db connection...";

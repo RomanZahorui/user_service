@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Properties;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import utils.execptions.NotValidDataException;
 import utils.readers.provider.ResourceFileReaderProvider;
 import utils.readers.provider.BufferedReaderProvider;
 import utils.readers.file.PropertyFileReader;
@@ -13,25 +14,24 @@ public class PropertyFileReaderTest {
     private final BufferedReaderProvider readerProvider = new ResourceFileReaderProvider();
 
     @Test
-    public void readTest() {
+    public void readNotNullTest() throws IOException {
+        String testPath = "test.properties";
+        Assertions.assertNotNull(reader.read(readerProvider, testPath));
+    }
+
+    @Test
+    public void readTest() throws IOException {
         String testPath = "test.properties";
         String testLine = "test.jdbc.driver";
-        try {
-            Properties result = reader.read(readerProvider, testPath);
-            Assertions.assertEquals("com.mysql.jdbc.Driver", result.getProperty(testLine));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        Properties result = reader.read(readerProvider, testPath);
+        Assertions.assertEquals("com.mysql.jdbc.Driver", result.getProperty(testLine));
     }
 
     @Test
     public void readTestIOException() {
         String testPath = "test.properties23";
-        String testLine = "Can't read property file : test.properties23";
-        try {
-            Properties result = reader.read(readerProvider, testPath);
-        } catch (IOException e) {
-            Assertions.assertEquals(testLine, e.getMessage());
-        }
+        Assertions.assertThrows(IOException.class, () -> {
+            reader.read(readerProvider, testPath);
+        });
     }
 }
