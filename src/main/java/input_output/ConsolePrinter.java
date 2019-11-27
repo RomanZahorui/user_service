@@ -25,7 +25,6 @@ public class ConsolePrinter implements DataPrinter {
      */
     @Override
     public void println(String msg) {
-        printNewLine();
         print(msg);
     }
 
@@ -36,14 +35,6 @@ public class ConsolePrinter implements DataPrinter {
      */
     @Override
     public void printErr(String errorMsg) {
-        printNewLine();
         logger.error(errorMsg);
-    }
-
-    /**
-     * Prints a new line.
-     */
-    private void printNewLine() {
-        logger.trace("\n");
     }
 }

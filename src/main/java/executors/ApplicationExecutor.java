@@ -7,15 +7,16 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import model.BaseModel;
+import model.City;
+import model.Country;
+import model.User;
 import model.connector.ConnectionProvider;
 import model.entities.FlatUser;
 import model.entities.mapper.FlatUserMapper;
 import model.entities.mapper.UserDataMapper;
-import model.City;
-import model.Country;
-import model.User;
 import model.producer.impl.CityFactory;
 import model.producer.impl.CountryFactory;
 import model.producer.impl.UserFactory;
@@ -29,9 +30,9 @@ import utils.parsers.DataParser;
 import utils.parsers.StringDataParser;
 import utils.readers.file.PropertyReader;
 import utils.readers.file.RecordsReader;
-import utils.readers.provider.SystemFileReaderProvider;
-import utils.readers.provider.ResourceReaderProvider;
 import utils.readers.provider.BufferedReaderProvider;
+import utils.readers.provider.ResourceReaderProvider;
+import utils.readers.provider.SystemFileReaderProvider;
 import utils.readers.script.ScriptReader;
 
 /**
@@ -61,9 +62,9 @@ public class ApplicationExecutor implements Executor {
     /**
      * Constructor.
      *
-     * @param provider   provides a DB connection.
+     * @param provider      provides a DB connection.
      * @param recordsReader for a CSV file reading.
-     * @param ioHandler  for app input and output process.
+     * @param ioHandler     for app input and output process.
      */
     public ApplicationExecutor(ConnectionProvider provider,
                                RecordsReader recordsReader,
@@ -91,43 +92,60 @@ public class ApplicationExecutor implements Executor {
         usersFileUri = ioHandler.readLine();
 
         ioHandler.println(SystemMsg.DATA_LOADING);
-        if (!loadAllData(fileReader)) {
+        try {
+            loadAllData(fileReader);
+        } catch (IOException e) {
+            ioHandler.print(SystemMsg.ERROR_FILE_READING + e.getMessage());
             return;
         }
 
         ioHandler.println(SystemMsg.MODELS_CREATION);
-        boolean isParsed = parseData(s -> Arrays.asList(s.split(",")), new StringDataParser(),
-            s -> s.replaceAll("[^a-zA-Z0-9|(\\s-)]", ""),
-            ioHandler);
-        if (!isParsed) {
+        try {
+            parseData(s -> Arrays.asList(s.split(",")), new StringDataParser(),
+                s -> s.replaceAll("[^a-zA-Z0-9|(\\s-)]", ""));
+        } catch (NotValidDataException e) {
+            ioHandler.printErr(SystemMsg.ERROR_DATA_PARSING + e.getMessage());
             return;
         }
 
         ioHandler.println(SystemMsg.ESTABLISH_CONNECTION);
-        Connection connection = establishConnection(provider, propertyReader, ioHandler);
-        if (connection == null) {
+        Connection connection;
+        try {
+            connection = establishConnection(provider, propertyReader);
+        } catch (SQLException | IOException e) {
+            ioHandler.printErr(SystemMsg.ERROR_WHILE_CONNECTION + e.getMessage());
             return;
         }
 
         ioHandler.println(SystemMsg.SCRIPT_EXECUTION);
-        boolean isExecuted = executeInitialScripts(connection, scriptReader, ioHandler);
-        if (!isExecuted) {
+        final BufferedReaderProvider readerProvider = new ResourceReaderProvider();
+        try {
+            executeSqlScript(connection,
+                retrieveScript(readerProvider, scriptReader, SystemMsg.SCRIPT_SCHEMA));
+            executeSqlScript(connection,
+                retrieveScript(readerProvider, scriptReader, SystemMsg.SCRIPT_TABLE));
+        } catch (SQLException | IOException e) {
+            ioHandler.printErr(SystemMsg.ERROR_EXECUTING_SQL + e.getMessage());
             return;
         }
 
         ioHandler.println(SystemMsg.DATA_SAVING);
         FlatUserService service = new FlatUserServiceImpl(connection);
         UserDataMapper mapper = new FlatUserMapper();
-        boolean isSaved = saveUsers(service, mapper, ioHandler);
-        if (!isSaved) {
+        try {
+            saveUsers(service, mapper);
+        } catch (SQLException e) {
+            ioHandler.printErr(SystemMsg.ERROR_WHILE_SAVING + e.getMessage());
             return;
         }
-        ioHandler.println(SystemMsg.SAVED_USER_MSG);
 
-        List<FlatUser> savedUsers = selectAllUsers(service, ioHandler);
-        if (null != savedUsers && !savedUsers.isEmpty()) {
+        ioHandler.println(SystemMsg.SAVED_USER_MSG);
+        try {
+            Optional<List<FlatUser>> savedUsers = Optional.ofNullable(selectAllUsers(service));
             ioHandler.println(SystemMsg.STORED_USERS_MSG);
-            savedUsers.forEach(u -> ioHandler.println(u.toString()));
+            savedUsers.orElseThrow(SQLException::new).forEach(u -> ioHandler.println(u.toString()));
+        } catch (SQLException e) {
+            ioHandler.printErr(SystemMsg.ERROR_WHILE_SELECTING + e.getMessage());
         }
     }
 
@@ -136,23 +154,16 @@ public class ApplicationExecutor implements Executor {
      * to the {@link #loadData(RecordsReader, String)} method.
      *
      * @param reader to read the specified files data.
-     * @return true if the reading operation was successful.
      */
-    private boolean loadAllData(RecordsReader reader) {
-        try {
-            ioHandler.println(SystemMsg.READ_COUNTRIES_FILE);
-            countryRecords = loadData(reader, countriesFileUri);
+    private void loadAllData(RecordsReader reader) throws IOException {
+        ioHandler.println(SystemMsg.READ_COUNTRIES_FILE);
+        countryRecords = loadData(reader, countriesFileUri);
 
-            ioHandler.println(SystemMsg.READ_CITIES_FILE);
-            cityRecords = loadData(reader, citiesFileUri);
+        ioHandler.println(SystemMsg.READ_CITIES_FILE);
+        cityRecords = loadData(reader, citiesFileUri);
 
-            ioHandler.println(SystemMsg.READ_USERS_FILE);
-            userRecords = loadData(reader, usersFileUri);
-        } catch (IOException e) {
-            ioHandler.print(SystemMsg.ERROR_FILE_READING + e.getMessage());
-            return false;
-        }
-        return true;
+        ioHandler.println(SystemMsg.READ_USERS_FILE);
+        userRecords = loadData(reader, usersFileUri);
     }
 
     /**
@@ -174,113 +185,80 @@ public class ApplicationExecutor implements Executor {
      *
      * @param separator to split record into string representations of a model parameters.
      * @param formatter to format strings of the model parameters.
-     * @param ioHandler printing of an error information.
-     * @return true if the parsing process was successful.
      */
-    private boolean parseData(MetaSeparator separator, DataParser<String> parser,
-                              Formatter formatter, InOutHandler ioHandler) {
-        try {
-            countries = countryRecords.stream()
-                .map(s -> new CountryFactory(parser).produce(separator.separate(s), formatter))
-                .collect(Collectors.toList());
+    private void parseData(MetaSeparator separator, DataParser<String> parser,
+                           Formatter formatter) throws NotValidDataException {
+        countries = countryRecords.stream()
+            .map(s -> new CountryFactory(parser).produce(separator.separate(s), formatter))
+            .collect(Collectors.toList());
 
-            cities = cityRecords.stream()
-                .map(s -> new CityFactory(parser).produce(separator.separate(s), formatter))
-                .collect(Collectors.toList());
+        cities = cityRecords.stream()
+            .map(s -> new CityFactory(parser).produce(separator.separate(s), formatter))
+            .collect(Collectors.toList());
 
-            users = userRecords.stream()
-                .map(s -> new UserFactory(parser).produce(separator.separate(s), formatter))
-                .collect(Collectors.toList());
-        } catch (NotValidDataException e) {
-            ioHandler.printErr(SystemMsg.ERROR_DATA_PARSING + e.getMessage());
-            return false;
-        }
-        return true;
+        users = userRecords.stream()
+            .map(s -> new UserFactory(parser).produce(separator.separate(s), formatter))
+            .collect(Collectors.toList());
     }
-
 
     /**
      * Tries to establish a connection to a DB by {@link ConnectionProvider}.
      *
-     * @param provider  for a DB connection.
-     * @param reader    a property file reader.
-     * @param ioHandler printing of an error information.
+     * @param provider for a DB connection.
+     * @param reader   a property file reader.
      * @return an established DB connection.
      */
-    private Connection establishConnection(ConnectionProvider provider, PropertyReader reader, InOutHandler ioHandler) {
-        Connection connection = null;
+    private Connection establishConnection(ConnectionProvider provider,
+                                           PropertyReader reader) throws SQLException, IOException {
         BufferedReaderProvider readerProvider = new ResourceReaderProvider();
-        try {
-            connection = provider.getConnection(reader.read(readerProvider, SystemMsg.PROPERTY_FILE));
-        } catch (SQLException | IOException e) {
-            ioHandler.printErr(SystemMsg.ERROR_WHILE_CONNECTION + e.getMessage());
-        }
-        return connection;
+        return provider.getConnection(reader.read(readerProvider, SystemMsg.PROPERTY_FILE));
     }
 
     /**
-     * Tries to execute some sql scripts for preparing the DB.
+     * Tries to execute some sql query for preparing the DB.
      *
      * @param connection {@link Connection} to a database.
-     * @param ioHandler  printing of an error information.
-     * @return true if the initial scripts was executed successful.
+     * @param query      to execute.
      */
-    private boolean executeInitialScripts(Connection connection, ScriptReader scriptReader, InOutHandler ioHandler) {
-
+    private void executeSqlScript(Connection connection, String query) throws SQLException {
         try (Statement st = connection.createStatement()) {
-            BufferedReaderProvider readerProvider = new ResourceReaderProvider();
-
-            try {
-                String schema = scriptReader.read(readerProvider, SystemMsg.SCRIPT_SCHEMA);
-                st.executeUpdate(schema);
-            } catch (SQLException | IOException e) {
-                ioHandler.printErr(SystemMsg.ERROR_EXECUTING_SQL + e.getMessage());
-            }
-
-            try {
-                String table = scriptReader.read(readerProvider, SystemMsg.SCRIPT_TABLE);
-                st.executeUpdate(table);
-            } catch (SQLException | IOException e) {
-                ioHandler.printErr(SystemMsg.ERROR_EXECUTING_SQL + e.getMessage());
-            }
-        } catch (SQLException e) {
-            ioHandler.printErr(SystemMsg.ERROR_EXECUTING_SQL + e.getMessage());
-            return false;
+            st.executeUpdate(query);
         }
-        return true;
+    }
+
+    /**
+     * Tries to create a String representation of the input {@code filePath} file inner data.
+     *
+     * @param readerProvider provides a buffered reader for the specified file path.
+     * @param scriptReader   to read all lines from the specified file.
+     * @param filePath       the path of the file to read.
+     * @return a string with read sql query.
+     * @throws IOException If an I/O error occurs while the file reading.
+     */
+    private String retrieveScript(BufferedReaderProvider readerProvider,
+                                  ScriptReader scriptReader, String filePath) throws IOException {
+        return scriptReader.read(readerProvider, filePath);
     }
 
     /**
      * Tries to map collected {@code List<User>}, {@code List<City>} and {@code List<Country>} data
      * into a list of {@link FlatUser} objects and save them by {@link FlatUserService}.
      *
-     * @param service   for saving the {@link FlatUser} objects into the DB.
-     * @param mapper    maps all collected data into the {@link FlatUser} objects.
-     * @param ioHandler printing of an error information.
-     * @return true if the initial scripts was executed successful.
+     * @param service for saving the {@link FlatUser} objects into the DB.
+     * @param mapper  maps all collected data into the {@link FlatUser} objects.
      */
-    private boolean saveUsers(FlatUserService service, UserDataMapper mapper, InOutHandler ioHandler) {
-        try {
-            return service.insertAll(mapper.mapToList(users, cities, countries));
-        } catch (SQLException e) {
-            ioHandler.printErr(SystemMsg.ERROR_WHILE_SAVING + e.getMessage());
-            return false;
-        }
+    private void saveUsers(FlatUserService service, UserDataMapper mapper)
+        throws SQLException {
+        service.insertAll(mapper.mapToList(users, cities, countries));
     }
 
     /**
      * Performs selection of all stored {@link FlatUser} objects in the DB.
      *
      * @param service   for retrieving the {@link FlatUser} objects from the DB.
-     * @param ioHandler printing of an error information.
      * @return list of stored {@link FlatUser}s.
      */
-    private List<FlatUser> selectAllUsers(FlatUserService service, InOutHandler ioHandler) {
-        try {
-            return service.selectAll();
-        } catch (SQLException e) {
-            ioHandler.printErr(SystemMsg.ERROR_WHILE_SELECTING + e.getMessage());
-            return null;
-        }
+    private List<FlatUser> selectAllUsers(FlatUserService service) throws SQLException {
+        return service.selectAll();
     }
 }
