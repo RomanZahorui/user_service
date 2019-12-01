@@ -4,10 +4,9 @@ import java.io.IOException;
 import java.util.Properties;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import utils.execptions.NotValidDataException;
-import utils.readers.provider.ResourceFileReaderProvider;
-import utils.readers.provider.BufferedReaderProvider;
 import utils.readers.file.PropertyFileReader;
+import utils.readers.provider.BufferedReaderProvider;
+import utils.readers.provider.ResourceFileReaderProvider;
 
 public class PropertyFileReaderTest {
     private final PropertyFileReader reader = new PropertyFileReader();

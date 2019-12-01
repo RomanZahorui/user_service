@@ -29,7 +29,7 @@ public class UserFactoryTest {
     @Test
     public void produceTest() {
         List<String> testUserData = Arrays.asList(testId, testName, testBirthday, testId);
-        User test = factory.produce(testUserData,  s -> s.replaceAll(SystemMsg.FORMAT_REGEX, ""));
+        User test = factory.produce(testUserData, s -> s.replaceAll(SystemMsg.FORMAT_REGEX, ""));
 
         Assertions.assertEquals(testUserData.get(0), String.valueOf(test.getId()));
         Assertions.assertEquals(testUserData.get(1), String.valueOf(test.getName()));

@@ -21,8 +21,7 @@ public class SystemFileReaderProvider implements BufferedReaderProvider {
     public BufferedReader getBufferedReader(String path) throws ReadFileException {
         final File file = new File(path);
         try {
-            InputStream inputStream = new FileInputStream(file);
-            return new BufferedReader(new InputStreamReader(inputStream));
+            return new BufferedReader(new FileReader(file));
         } catch (IOException e) {
             throw new ReadFileException("Can't read the file " + path, e);
         }

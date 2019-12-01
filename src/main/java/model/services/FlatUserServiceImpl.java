@@ -12,15 +12,23 @@ import model.entities.FlatUser;
 public class FlatUserServiceImpl implements FlatUserService {
 
     /**
-     * Constants and SQL queries.
+     * Constants and SQL statements.
      */
     private static final String schema = "user_registry";
     private static final String table = "flat_users";
+
     private static final String ID = "id";
     private static final String NAME = "name";
     private static final String BIRTHDAY = "date_of_birth";
     private static final String CITY = "city_name";
     private static final String COUNTRY = "country_name";
+
+    private static final int ID_IDX = 1;
+    private static final int NAME_IDX = 2;
+    private static final int BIRTHDAY_IDX = 3;
+    private static final int CITY_IDX = 4;
+    private static final int COUNTRY_IDX = 5;
+
     private static final String SQL_SELECT_BY_ID = "SELECT FROM " + schema + "." + table + " WHERE id = ?";
     private static final String SQL_SELECT_ALL = "SELECT * FROM " + schema + "." + table;
     private static final String SQL_INSERT = "INSERT INTO " + schema + "." + table
@@ -49,8 +57,8 @@ public class FlatUserServiceImpl implements FlatUserService {
      */
     @Override
     public void insertAll(List<FlatUser> users) throws SQLException {
-        for (FlatUser u : users) {
-            save(u);
+        for (FlatUser user : users) {
+            save(user);
         }
     }
 
@@ -63,11 +71,11 @@ public class FlatUserServiceImpl implements FlatUserService {
         try (PreparedStatement preparedStatement = connection.prepareStatement(SQL_SELECT_ALL);
              ResultSet resultSet = preparedStatement.executeQuery()) {
             while (resultSet.next()) {
-                int id = resultSet.getInt(1);
-                String name = resultSet.getString(2);
-                LocalDate birth = resultSet.getDate(3).toLocalDate();
-                String cityName = resultSet.getString(4);
-                String countryName = resultSet.getString(5);
+                int id = resultSet.getInt(ID);
+                String name = resultSet.getString(NAME);
+                LocalDate birth = resultSet.getDate(BIRTHDAY).toLocalDate();
+                String cityName = resultSet.getString(CITY);
+                String countryName = resultSet.getString(COUNTRY);
                 users.add(new FlatUser(id, name, birth, cityName, countryName));
             }
         }
@@ -83,11 +91,11 @@ public class FlatUserServiceImpl implements FlatUserService {
      */
     private void save(FlatUser user) throws SQLException {
         try (PreparedStatement stm = connection.prepareStatement(SQL_INSERT)) {
-            stm.setLong(1, user.getId());
-            stm.setString(2, user.getName());
-            stm.setDate(3, Date.valueOf(user.getBirthday()));
-            stm.setString(4, user.getCityName());
-            stm.setString(5, user.getCountryName());
+            stm.setLong(ID_IDX, user.getId());
+            stm.setString(NAME_IDX, user.getName());
+            stm.setDate(BIRTHDAY_IDX, Date.valueOf(user.getBirthday()));
+            stm.setString(CITY_IDX, user.getCityName());
+            stm.setString(COUNTRY_IDX, user.getCountryName());
             stm.executeUpdate();
         }
     }

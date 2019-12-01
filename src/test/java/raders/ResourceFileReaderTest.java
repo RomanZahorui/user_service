@@ -2,12 +2,11 @@ package raders;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Properties;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import utils.readers.provider.ResourceFileReaderProvider;
-import utils.readers.provider.BufferedReaderProvider;
 import utils.readers.file.CSVFileReader;
+import utils.readers.provider.BufferedReaderProvider;
+import utils.readers.provider.ResourceFileReaderProvider;
 
 public class ResourceFileReaderTest {
     private final CSVFileReader reader = new CSVFileReader();
