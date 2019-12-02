@@ -19,9 +19,8 @@ public class SystemFileReaderProvider implements BufferedReaderProvider {
      */
     @Override
     public BufferedReader getBufferedReader(String path) throws ReadFileException {
-        final File file = new File(path);
         try {
-            return new BufferedReader(new FileReader(file));
+            return new BufferedReader(new FileReader(path));
         } catch (IOException e) {
             throw new ReadFileException("Can't read the file " + path, e);
         }
